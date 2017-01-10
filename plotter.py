@@ -7,11 +7,6 @@ from datetime import datetime
 import plotly
 from plotly.graph_objs import Scattergl, Layout, Figure
 
-ANNOTATE = set([
-    11380,
-    11573,
-    11901,
-])
 
 def main():
     parser = argparse.ArgumentParser()
@@ -19,15 +14,20 @@ def main():
         help="Path to file containing JSON list of builds.")
     parser.add_argument("--max-diff", type=float, default=10.0,
         help="Highlight builds more than this number of minutes above the "
-             "average of the last 50 builds.")
+             "average of the last 50 builds. The default is 10.")
     parser.add_argument("--wall-clock",
         action="store_false", dest="duration", default=True,
-        help="If enabled, plot elapsed (wall clock) time instead "
-             "of total run time (duration) of test run.")
-#    parser.add_argument("--limit", type=int, default=40,
-#        help="Maximum number of requests to make. Each request pulls 25 builds.")
+        help="If enabled, plot elapsed (wall clock) time instead of "
+             "cumulative run time (duration) of all test nodes.")
+    parser.add_argument("--events",
+        help="Comma-delimited list of PR numbers to add to the 'Events' "
+             "series.")
 
     args = parser.parse_args()
+
+    event_prs = []
+    if args.events:
+        event_prs = set(int(e) for e in args.events.split(','))
 
     with open(args.path) as fh:
         builds = json.load(fh)
@@ -37,7 +37,6 @@ def main():
             build["started_at"]
             and build["state"] == "passed"
             and build["pull_request_number"]
-#            and build["number"] > "36480"
         )
 
     def label(build):
@@ -62,7 +61,7 @@ def main():
 
     normals = []
     abnormals = []
-    annotations = []
+    events = []
     recents = []
     for build in builds:
         rec = {
@@ -70,8 +69,8 @@ def main():
             "y": timefunc(build),
             "text": label(build),
         }
-        if build["pull_request_number"] in ANNOTATE:
-            annotations.append(rec)
+        if build["pull_request_number"] in event_prs:
+            events.append(rec)
         if len(recents) < 50:
             recents.append(rec)
             normals.append(rec)
@@ -101,7 +100,7 @@ def main():
                 mode='markers+text',
                 name='Event'.format(max_diff),
                 marker={"color": "rgba(200, 0, 0, 0.9)"},
-                **scatter_params(annotations)
+                **scatter_params(events)
             ),
         ],
         "layout": Layout(
