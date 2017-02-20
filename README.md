@@ -4,6 +4,7 @@ Usage:
 
 ```sh
 $ ./get-travis-builds.py --limit=2 > builds.json
+$ ./merge-travis-builds.py builds.json other-builds.json > merged-builds.json
 $ ./plotter.py builds.json
 ```
 
