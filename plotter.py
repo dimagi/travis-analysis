@@ -83,26 +83,26 @@ def main():
             recents.append(rec)
 
     plotly.offline.plot({
-        "data": [
-            Scattergl(
+        "data": [plot for data, plot in [
+            (normals, Scattergl(
                 mode='markers+text',
                 name='Average',
                 marker={"color": "rgba(0, 147, 0, 0.9)"},
                 **scatter_params(normals)
-            ),
-            Scattergl(
+            )),
+            (abnormals, Scattergl(
                 mode='markers+text',
                 name='+{} min'.format(max_diff),
                 marker={"color": "rgba(0, 128, 255, 0.9)"},
                 **scatter_params(abnormals)
-            ),
-            Scattergl(
+            )),
+            (events, Scattergl(
                 mode='markers+text',
-                name='Event'.format(max_diff),
+                name='Event',
                 marker={"color": "rgba(200, 0, 0, 0.9)"},
                 **scatter_params(events)
-            ),
-        ],
+            )),
+        ] if data],
         "layout": Layout(
             title="Test Build Times",
             hovermode="closest",
