@@ -63,6 +63,7 @@ def main():
     abnormals = []
     events = []
     recents = []
+    print("Processing {} builds".format(len(builds)))
     for build in builds:
         rec = {
             "x": getdate(build["started_at"]),
